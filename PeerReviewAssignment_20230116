@@ -1,0 +1,196 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jan 16 19:30:32 2023
+
+@author: steve
+"""
+
+
+import yfinance as yf
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+'''
+In this section, we define the function `make_graph`. You don't have to know how the function works, you should only care about the inputs. It takes a dataframe with stock data (dataframe must contain Date and Close columns), a dataframe with revenue data (dataframe must contain Date and Revenue columns), and the name of the stock.
+'''
+
+
+def make_graph(stock_data, revenue_data, stock):
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, subplot_titles=("Historical Share Price", "Historical Revenue"), vertical_spacing = .3)
+    stock_data_specific = stock_data[stock_data.Date <= '2021--06-14']
+    revenue_data_specific = revenue_data[revenue_data.Date <= '2021-04-30']
+    fig.add_trace(go.Scatter(x=pd.to_datetime(stock_data_specific.Date, infer_datetime_format=True), y=stock_data_specific.Close.astype("float"), name="Share Price"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=pd.to_datetime(revenue_data_specific.Date, infer_datetime_format=True), y=revenue_data_specific.Revenue.astype("float"), name="Revenue"), row=2, col=1)
+    fig.update_xaxes(title_text="Date", row=1, col=1)
+    fig.update_xaxes(title_text="Date", row=2, col=1)
+    fig.update_yaxes(title_text="Price ($US)", row=1, col=1)
+    fig.update_yaxes(title_text="Revenue ($US Millions)", row=2, col=1)
+    fig.update_layout(showlegend=False,
+    height=900,
+    title=stock,
+    xaxis_rangeslider_visible=True)
+    fig.show()
+
+#Find stock info
+import yfinance as yf
+import pandas as pd
+
+tsla = yf.Ticker("TSLA")
+
+tsla_info=tsla.info
+tsla_info
+
+tsla_info['country']
+tsla_info['dayLow']
+
+tesla_data = tsla.history(period="max")
+
+
+tesla_data.head()
+tesla_data.reset_index(inplace=True)
+
+
+
+
+#### Extracting Stock Data Using a Web Scraping ####
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+
+
+url = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0220EN-SkillsNetwork/labs/project/revenue.htm'
+
+html_data  = requests.get(url).text
+soup = BeautifulSoup(html_data, 'html5lib')
+
+#tsla_data = pd.DataFrame(columns=["Date", "Open", "High", "Low", "Close", "Volume"])
+
+read_html_pandas_data = pd.read_html(url)
+read_html_pandas_data = pd.read_html(str(soup))
+tesla_revenue = read_html_pandas_data[0]
+
+tesla_revenue.head()
+
+tesla_revenue.columns =['Date', 'Revenue']
+
+#Execute the following line to remove the comma and dollar sign from the Revenue column.
+tesla_revenue["Revenue"] = tesla_revenue['Revenue'].str.replace(',|\$',"")
+
+#Execute the following lines to remove an null or empty strings in the Revenue column.
+tesla_revenue.dropna(inplace=True)
+
+tesla_revenue = tesla_revenue[tesla_revenue['Revenue'] != ""]
+
+
+tesla_revenue.tail(5)
+
+
+
+########################################
+#Question 3: Use yfinance to Extract Stock Data
+
+#Find stock info
+import yfinance as yf
+import pandas as pd
+
+gme = yf.Ticker("GME")
+
+gme_info=gme.info
+gme_info
+
+gme_info['country']
+gme_info['dayLow']
+
+gme_data = gme.history(period="max")
+
+
+gme_data.head()
+gme_data.reset_index(inplace=True)
+
+
+#### Extracting Stock Data Using a Web Scraping ####
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+url2 = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0220EN-SkillsNetwork/labs/project/stock.html'
+html_data  = requests.get(url2).text
+soup = BeautifulSoup(html_data, 'html5lib')
+
+read_html_pandas_data = pd.read_html(url2)
+read_html_pandas_data = pd.read_html(str(soup))
+gme_revenue = read_html_pandas_data[0]
+
+gme_revenue.head()
+
+gme_revenue.columns =['Date', 'Revenue']
+
+#Execute the following line to remove the comma and dollar sign from the Revenue column.
+gme_revenue["Revenue"] = gme_revenue['Revenue'].str.replace(',|\$',"")
+
+#Execute the following lines to remove an null or empty strings in the Revenue column.
+gme_revenue.dropna(inplace=True)
+
+gme_revenue = gme_revenue[gme_revenue['Revenue'] != ""]
+
+#View last five records
+gme_revenue.tail(5)
+
+#Display a graph
+import yfinance as yf
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+'''
+In this section, we define the function `make_graph`. You don't have to know how the function works, you should only care about the inputs. It takes a dataframe with stock data (dataframe must contain Date and Close columns), a dataframe with revenue data (dataframe must contain Date and Revenue columns), and the name of the stock.
+'''
+
+
+#Find number of rows in dataframes
+print(tesla_data.count())
+
+tesla_data.plot(x="Date", y="Close")
+tesla_revenue.plot(x="Date", y="Revenue")
+
+
+# Make a graph for Tesla stock price compared to revenue
+def make_graph(tesla_data, tesla_revenue, 'Tesla'):
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, subplot_titles=("Historical Share Price", "Historical Revenue"), vertical_spacing = .3)
+    stock_data_specific = tesla_data[tesla_data.Date <= '2021--06-14']
+    revenue_data_specific = tesla_revenue[tesla_revenue.Date <= '2021-04-30']
+    fig.add_trace(go.Scatter(x=pd.to_datetime(stock_data_specific.Date, infer_datetime_format=True), y=stock_data_specific.Close.astype("float"), name="Share Price"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=pd.to_datetime(revenue_data_specific.Date, infer_datetime_format=True), y=revenue_data_specific.Revenue.astype("float"), name="Revenue"), row=2, col=1)
+    fig.update_xaxes(title_text="Date", row=1, col=1)
+    fig.update_xaxes(title_text="Date", row=2, col=1)
+    fig.update_yaxes(title_text="Price ($US)", row=1, col=1)
+    fig.update_yaxes(title_text="Revenue ($US Millions)", row=2, col=1)
+    fig.update_layout(showlegend=False,
+    height=900,
+    title=stock,
+    xaxis_rangeslider_visible=True)
+    fig.show()
+
+# Make a graph for GameStop stock price compared to revenue
+def make_graph(gme_data, gme_revenue, 'GameStop'):
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, subplot_titles=("Historical Share Price", "Historical Revenue"), vertical_spacing = .3)
+    stock_data_specific = gme_data[gme_data.Date <= '2021-06-14']
+    revenue_data_specific = gme_revenue[gme_revenue.Date <= '2021-04-30']
+    fig.add_trace(go.Scatter(x=pd.to_datetime(stock_data_specific.Date, infer_datetime_format=True), y=stock_data_specific.Close.astype("float"), name="Share Price"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=pd.to_datetime(revenue_data_specific.Date, infer_datetime_format=True), y=revenue_data_specific.Revenue.astype("float"), name="Revenue"), row=2, col=1)
+    fig.update_xaxes(title_text="Date", row=1, col=1)
+    fig.update_xaxes(title_text="Date", row=2, col=1)
+    fig.update_yaxes(title_text="Price ($US)", row=1, col=1)
+    fig.update_yaxes(title_text="Revenue ($US Millions)", row=2, col=1)
+    fig.update_layout(showlegend=False,
+    height=900,
+    title=stock,
+    xaxis_rangeslider_visible=True)
+    fig.show()
+    
+    
+    
